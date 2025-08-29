@@ -1,9 +1,9 @@
 "use server";
 
 import { z } from "zod";
-import { db } from "@/lib/firebase";
+import { adminDb } from "@/lib/firebase-admin";
 import { generateFactCheckReport, GenerateFactCheckReportInput, GenerateFactCheckReportOutput } from "@/ai/flows/generate-fact-check-report";
-import { collection, addDoc, serverTimestamp, Timestamp } from "firebase/firestore";
+import { Timestamp } from "firebase-admin/firestore";
 
 const claimSchema = z.object({
   title: z.string(),
@@ -36,14 +36,20 @@ export async function submitClaim(values: z.infer<typeof claimSchema>, userId: s
       truthScore: report.truthScore,
       verdict: report.verdict,
       supportingSources: report.supportingSources,
-      createdAt: serverTimestamp() as Timestamp,
+      createdAt: Timestamp.now(),
     };
 
-    const docRef = await addDoc(collection(db, "reports"), reportData);
+    const docRef = await adminDb.collection("reports").add(reportData);
 
     return { success: true, data: { ...report, id: docRef.id } };
   } catch (error: any) {
     console.error("Error submitting claim:", error);
+
+    // Provide a more specific error message if it's a permission issue from Firestore
+    if (error.code === 'permission-denied' || (error.details && error.details.includes('Permission denied'))) {
+      return { success: false, error: "Firestore Security Rules denied the operation. Please check your rules in the Firebase console." };
+    }
+
     const errorMessage = error.message || "An unexpected response was received from the server.";
     return { success: false, error: errorMessage };
   }
