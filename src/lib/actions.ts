@@ -36,7 +36,7 @@ export async function submitClaim(values: z.infer<typeof claimSchema>, userId: s
       truthScore: report.truthScore,
       verdict: report.verdict,
       supportingSources: report.supportingSources,
-      createdAt: serverTimestamp(),
+      createdAt: serverTimestamp() as Timestamp,
     };
 
     const docRef = await addDoc(collection(db, "reports"), reportData);
