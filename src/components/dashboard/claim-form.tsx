@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import type { ReportWithId } from "@/app/(app)/dashboard/page";
+import { useAuth } from "@/hooks/use-auth";
 
 const formSchema = z.object({
   title: z.string().min(10, "Title must be at least 10 characters.").max(150, "Title must be 150 characters or less."),
@@ -31,6 +32,7 @@ const claimCategories = ["Politics", "Health", "Science", "Technology", "Social 
 export function ClaimForm({ onReportGenerated }: ClaimFormProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -42,9 +44,18 @@ export function ClaimForm({ onReportGenerated }: ClaimFormProps) {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!user) {
+        toast({
+            variant: "destructive",
+            title: "Authentication Error",
+            description: "You must be logged in to submit a claim.",
+        });
+        return;
+    }
+
     setIsLoading(true);
     try {
-      const result = await submitClaim(values);
+      const result = await submitClaim(values, user.uid);
       if (result.success && result.data) {
         toast({
           title: "Report Generated!",
@@ -141,7 +152,7 @@ export function ClaimForm({ onReportGenerated }: ClaimFormProps) {
                 )}
               />
             </div>
-            <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
+            <Button type="submit" size="lg" className="w-full" disabled={isLoading || !user}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
