@@ -43,7 +43,15 @@ export async function submitClaim(values: z.infer<typeof claimSchema>, userId: s
     return { success: true, data: { ...report, id: docRef.id } };
   } catch (error: any) {
     console.error("Error submitting claim:", error);
-    // Pass a more specific error message to the client
+    
+    // Check for Firestore permission denied error
+    if (error.code === 'permission-denied') {
+      return { 
+        success: false, 
+        error: "Firestore permission denied. Please check your security rules in the Firebase console. Authenticated users should be allowed to create documents in the 'reports' collection." 
+      };
+    }
+
     const errorMessage = error.message || "An unexpected error occurred while generating the report.";
     return { success: false, error: errorMessage };
   }
