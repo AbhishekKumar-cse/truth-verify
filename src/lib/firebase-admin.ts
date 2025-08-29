@@ -2,11 +2,6 @@ import admin from "firebase-admin";
 import { getApps, initializeApp, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 
-// IMPORTANT: You must provide your own service account key file.
-// 1. Go to your Firebase Project Settings -> Service accounts.
-// 2. Click "Generate new private key" and download the JSON file.
-// 3. Rename it to 'serviceAccountKey.json' and place it in your project's root directory.
-// 4. Make sure this file is added to .gitignore and is NOT committed to source control.
 try {
   const serviceAccount = require("../../serviceAccountKey.json");
 
@@ -16,14 +11,28 @@ try {
       projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
     });
   }
-} catch (error) {
-    if (process.env.NODE_ENV !== 'production') {
-        console.warn("Could not find 'serviceAccountKey.json'. Server-side Firebase operations will fail. This is expected during client-side development if the file is not present.");
+} catch (error: any) {
+    // This error is expected if the service account key is not yet present.
+    // We will log a warning in development, but not crash the app.
+    if (error.code === 'MODULE_NOT_FOUND') {
+        if (process.env.NODE_ENV === 'development') {
+            console.warn(
+                "\n***********************************************************************\n" +
+                "WARNING: 'serviceAccountKey.json' not found in root directory.\n" + 
+                "Server-side Firebase operations (like submitting a claim) will fail.\n" +
+                "This is expected until you complete the final setup step.\n" +
+                "Please download the key from your Firebase project settings and add it to the project root.\n" +
+                "***********************************************************************\n"
+            );
+        } else {
+             console.error("CRITICAL: 'serviceAccountKey.json' is missing. Server-side Firebase functionality is disabled.");
+        }
     } else {
-        console.error("CRITICAL: 'serviceAccountKey.json' is missing. Server-side Firebase functionality is disabled.");
+        console.error("An unexpected error occurred during Firebase Admin initialization:", error);
     }
 }
 
-const adminDb = getFirestore();
+// Get the Firestore instance, but it might not be initialized if the key is missing.
+const adminDb = getApps().length ? getFirestore() : null;
 
 export { adminDb };

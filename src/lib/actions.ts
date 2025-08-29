@@ -14,6 +14,10 @@ const claimSchema = z.object({
 
 export async function submitClaim(values: z.infer<typeof claimSchema>, userId: string): Promise<{ success: boolean; data?: GenerateFactCheckReportOutput & { id: string }; error?: string }> {
   try {
+    if (!adminDb) {
+      throw new Error("Firebase Admin SDK is not initialized. Please ensure your service account key is configured correctly on the server.");
+    }
+    
     if (!userId) {
       throw new Error("Authentication failed. User not found.");
     }
@@ -44,11 +48,6 @@ export async function submitClaim(values: z.infer<typeof claimSchema>, userId: s
     return { success: true, data: { ...report, id: docRef.id } };
   } catch (error: any) {
     console.error("Error submitting claim:", error);
-
-    // Provide a more specific error message if it's a permission issue from Firestore
-    if (error.code === 'permission-denied' || (error.details && error.details.includes('Permission denied'))) {
-      return { success: false, error: "Firestore Security Rules denied the operation. Please check your rules in the Firebase console." };
-    }
 
     const errorMessage = error.message || "An unexpected response was received from the server.";
     return { success: false, error: errorMessage };
