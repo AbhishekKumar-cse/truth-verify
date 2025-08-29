@@ -50,10 +50,9 @@ export function ReportsList() {
           })) as Report[];
           
           setReports(reportsData);
-          setError(null);
         } catch (error: any) {
           console.error("Error fetching reports:", error);
-          setError("An error occurred while fetching your reports. Please ensure your Firestore security rules and indexes are set up correctly. The error is: " + error.message);
+          setError("Failed to fetch reports. Please check your Firestore security rules and ensure the necessary indexes are built. The error was: " + error.message);
         } finally {
           setLoading(false);
         }
