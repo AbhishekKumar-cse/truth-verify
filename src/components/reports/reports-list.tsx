@@ -36,21 +36,24 @@ export function ReportsList() {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
+          const reportsRef = collection(db, "reports");
           const q = query(
-            collection(db, "reports"),
+            reportsRef,
             where("userId", "==", user.uid),
             orderBy("createdAt", "desc")
           );
+
           const querySnapshot = await getDocs(q);
           const reportsData = querySnapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
           })) as Report[];
+          
           setReports(reportsData);
           setError(null);
         } catch (error: any) {
           console.error("Error fetching reports:", error);
-          setError("An error occurred while fetching your reports. Please ensure your Firestore security rules and indexes are set up correctly.");
+          setError("An error occurred while fetching your reports. Please ensure your Firestore security rules and indexes are set up correctly. The error is: " + error.message);
         } finally {
           setLoading(false);
         }
