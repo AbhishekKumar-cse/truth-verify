@@ -43,6 +43,8 @@ export async function submitClaim(values: z.infer<typeof claimSchema>, userId: s
     return { success: true, data: { ...report, id: docRef.id } };
   } catch (error: any) {
     console.error("Error submitting claim:", error);
-    return { success: false, error: error.message || "An unexpected error occurred." };
+    // Pass a more specific error message to the client
+    const errorMessage = error.message || "An unexpected error occurred while generating the report.";
+    return { success: false, error: errorMessage };
   }
 }
