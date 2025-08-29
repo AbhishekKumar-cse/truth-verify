@@ -30,6 +30,7 @@ export function ReportsList() {
   const router = useRouter();
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -46,13 +47,21 @@ export function ReportsList() {
             ...doc.data(),
           })) as Report[];
           setReports(reportsData);
-        } catch (error) {
+          setError(null);
+        } catch (error: any) {
           console.error("Error fetching reports:", error);
+          if (error.code === 'permission-denied') {
+             setError("Firestore permission denied. Please check your security rules and indexes in the Firebase console.");
+          } else {
+             setError("An error occurred while fetching your reports.");
+          }
         } finally {
           setLoading(false);
         }
       } else {
+        // Not logged in
         setLoading(false);
+        setReports([]);
       }
     });
 
@@ -68,6 +77,19 @@ export function ReportsList() {
         <Skeleton className="h-12 w-full" />
       </div>
     );
+  }
+
+  if (error) {
+     return (
+        <Card className="text-center py-12 bg-destructive/10 border-destructive">
+            <CardHeader>
+                <CardTitle className="text-destructive">An Error Occurred</CardTitle>
+                <CardDescription className="text-destructive/80">
+                    {error}
+                </CardDescription>
+            </CardHeader>
+        </Card>
+     )
   }
 
   if (reports.length === 0) {
