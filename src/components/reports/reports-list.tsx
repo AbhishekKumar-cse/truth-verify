@@ -82,7 +82,7 @@ export function ReportsList() {
         <Card className="text-center py-12 bg-destructive/10 border-destructive">
             <CardHeader>
                 <CardTitle className="text-destructive">An Error Occurred</CardTitle>
-                <CardDescription className="text-destructive/80">
+                <CardDescription className="text-destructive/80 break-all">
                     {error}
                 </CardDescription>
             </CardHeader>
