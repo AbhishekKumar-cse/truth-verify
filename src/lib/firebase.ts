@@ -3,12 +3,12 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDtu02p-rL4F4NJ4MOVh1yA1_-kii16-Dw",
-  authDomain: "truth-lens-z6wwx.firebaseapp.com",
-  projectId: "truth-lens-z6wwx",
-  storageBucket: "truth-lens-z6wwx.firebasestorage.app",
-  messagingSenderId: "852170486176",
-  appId: "1:852170486176:web:455d31760aab9179a074c5",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase

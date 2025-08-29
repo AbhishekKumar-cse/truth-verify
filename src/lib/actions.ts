@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { db } from "@/lib/firebase";
 import { generateFactCheckReport, GenerateFactCheckReportInput, GenerateFactCheckReportOutput } from "@/ai/flows/generate-fact-check-report";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, Timestamp } from "firebase/firestore";
 
 const claimSchema = z.object({
   title: z.string(),
@@ -25,7 +25,6 @@ export async function submitClaim(values: z.infer<typeof claimSchema>, userId: s
       sourceUrl: validatedValues.sourceUrl || undefined,
     };
 
-    // The AI flow now has retry logic built-in
     const report = await generateFactCheckReport(reportInput);
 
     const reportData = {
@@ -34,7 +33,9 @@ export async function submitClaim(values: z.infer<typeof claimSchema>, userId: s
       claimStatement: validatedValues.statement,
       claimCategory: validatedValues.category,
       claimSourceUrl: validatedValues.sourceUrl || "",
-      ...report,
+      truthScore: report.truthScore,
+      verdict: report.verdict,
+      supportingSources: report.supportingSources,
       createdAt: serverTimestamp(),
     };
 
