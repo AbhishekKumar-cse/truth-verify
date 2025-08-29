@@ -44,7 +44,7 @@ Based on your analysis, provide the following:
 
 - TruthScore: A numerical score (0-100) representing the truthfulness of the claim. 100 means completely true and 0 means completely false.
 - Verdict: A concise verdict on the claim (e.g., True, False, Mostly True, Mostly False, Misleading).
-- SupportingSources: A list of URLs or references to credible sources supporting the verdict. Be very careful about which sources to trust.
+- SupportingSources: A list of URLs or references to credible sources supporting the verdict. Be very careful about which sources to trust. If no sources are found, return an empty array [].
 
 Format your response as a JSON object.`,
 });
@@ -57,6 +57,9 @@ const generateFactCheckReportFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await generateFactCheckReportPrompt(input);
-    return output!;
+    if (!output) {
+      throw new Error("An unexpected response was received from the server.");
+    }
+    return output;
   }
 );
