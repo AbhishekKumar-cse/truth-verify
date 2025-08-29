@@ -2,9 +2,8 @@
 
 import { z } from "zod";
 import { db } from "@/lib/firebase";
-import { generateFactCheckReport } from "@/ai/flows/generate-fact-check-report";
+import { generateFactCheckReport, GenerateFactCheckReportInput, GenerateFactCheckReportOutput } from "@/ai/flows/generate-fact-check-report";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import type { GenerateFactCheckReportInput } from "@/ai/flows/generate-fact-check-report";
 
 const claimSchema = z.object({
   title: z.string(),
@@ -13,7 +12,7 @@ const claimSchema = z.object({
   sourceUrl: z.string().optional(),
 });
 
-export async function submitClaim(values: z.infer<typeof claimSchema>, userId: string) {
+export async function submitClaim(values: z.infer<typeof claimSchema>, userId: string): Promise<{ success: boolean; data?: GenerateFactCheckReportOutput & { id: string }; error?: string }> {
   try {
     if (!userId) {
       throw new Error("Authentication failed. User not found.");
@@ -26,6 +25,7 @@ export async function submitClaim(values: z.infer<typeof claimSchema>, userId: s
       sourceUrl: validatedValues.sourceUrl || undefined,
     };
 
+    // The AI flow now has retry logic built-in
     const report = await generateFactCheckReport(reportInput);
 
     const reportData = {
@@ -43,16 +43,7 @@ export async function submitClaim(values: z.infer<typeof claimSchema>, userId: s
     return { success: true, data: { ...report, id: docRef.id } };
   } catch (error: any) {
     console.error("Error submitting claim:", error);
-    
-    // Check for Firestore permission denied error
-    if (error.code === 'permission-denied') {
-      return { 
-        success: false, 
-        error: "Firestore permission denied. Please check your security rules in the Firebase console. Authenticated users should be allowed to create documents in the 'reports' collection." 
-      };
-    }
-
-    const errorMessage = error.message || "An unexpected error occurred while generating the report.";
+    const errorMessage = error.message || "An unexpected response was received from the server.";
     return { success: false, error: errorMessage };
   }
 }
