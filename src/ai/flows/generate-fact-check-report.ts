@@ -58,7 +58,7 @@ const generateFactCheckReportFlow = ai.defineFlow(
   async input => {
     const {output} = await generateFactCheckReportPrompt(input);
     if (!output) {
-      throw new Error("An unexpected response was received from the server.");
+      throw new Error("The AI model failed to produce a valid report. Please try again.");
     }
     return output;
   }
