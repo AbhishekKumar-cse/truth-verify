@@ -50,11 +50,7 @@ export function ReportsList() {
           setError(null);
         } catch (error: any) {
           console.error("Error fetching reports:", error);
-          if (error.code === 'permission-denied') {
-             setError("Firestore permission denied. Please check your security rules and indexes in the Firebase console.");
-          } else {
-             setError("An error occurred while fetching your reports.");
-          }
+          setError("An error occurred while fetching your reports. Please ensure your Firestore security rules and indexes are set up correctly.");
         } finally {
           setLoading(false);
         }
