@@ -6,14 +6,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { submitClaim } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import type { ReportWithId } from "@/app/(app)/dashboard/page";
 import { useAuth } from "@/hooks/use-auth";
 
 const formSchema = z.object({
@@ -23,13 +22,9 @@ const formSchema = z.object({
   sourceUrl: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
 });
 
-type ClaimFormProps = {
-  onReportGenerated: (report: ReportWithId) => void;
-};
-
 const claimCategories = ["Politics", "Health", "Science", "Technology", "Social Media", "Business", "Other"];
 
-export function ClaimForm({ onReportGenerated }: ClaimFormProps) {
+export function ClaimForm() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
@@ -59,9 +54,9 @@ export function ClaimForm({ onReportGenerated }: ClaimFormProps) {
       if (result.success && result.data) {
         toast({
           title: "Report Generated!",
-          description: "Your fact-check report is ready.",
+          description: "Your fact-check report has been saved to 'My Reports'.",
         });
-        onReportGenerated(result.data);
+        form.reset();
       } else {
         throw new Error(result.error || "Failed to generate report.");
       }
@@ -77,14 +72,10 @@ export function ClaimForm({ onReportGenerated }: ClaimFormProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-3xl font-bold">Fact-Check a Claim</CardTitle>
-        <CardDescription>Enter the details of the claim you want to verify. Our AI will analyze it and provide a detailed report.</CardDescription>
-      </CardHeader>
-      <CardContent>
+    <Card className="h-full">
+      <CardContent className="pt-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="title"
@@ -115,7 +106,7 @@ export function ClaimForm({ onReportGenerated }: ClaimFormProps) {
                 </FormItem>
               )}
             />
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <FormField
                 control={form.control}
                 name="category"
@@ -143,9 +134,9 @@ export function ClaimForm({ onReportGenerated }: ClaimFormProps) {
                 name="sourceUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Source URL (Optional)</FormLabel>
+                    <FormLabel>Source URL</FormLabel>
                     <FormControl>
-                      <Input placeholder="https://example.com/article" {...field} />
+                      <Input placeholder="https://example.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

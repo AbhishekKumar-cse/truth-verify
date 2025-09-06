@@ -1,60 +1,30 @@
-"use client";
-
-import { useState } from "react";
 import { ClaimForm } from "@/components/dashboard/claim-form";
-import { ReportDisplay } from "@/components/dashboard/report-display";
-import type { GenerateFactCheckReportOutput } from "@/ai/flows/generate-fact-check-report";
-import { Button } from "@/components/ui/button";
-
-export type ReportWithId = GenerateFactCheckReportOutput & { id: string };
+import { MisinformationTrendsChart } from "@/components/dashboard/misinformation-trends-chart";
+import { DetectionAccuracyChart } from "@/components/dashboard/detection-accuracy-chart";
+import { ReportSummaryChart } from "@/components/dashboard/report-summary-chart";
+import { CategoryDistributionChart } from "@/components/dashboard/category-distribution-chart";
 
 export default function DashboardPage() {
-  const [report, setReport] = useState<ReportWithId | null>(null);
-  const [isExiting, setIsExiting] = useState(false);
-
-  const handleReportGenerated = (generatedReport: ReportWithId) => {
-    setIsExiting(true);
-    setTimeout(() => {
-        setReport(generatedReport);
-        setIsExiting(false);
-    }, 500);
-  };
-
-  const handleNewCheck = () => {
-    setIsExiting(true);
-    setTimeout(() => {
-        setReport(null);
-        setIsExiting(false);
-    }, 500);
-  }
-
-  const getAnimationClasses = (isReportVisible: boolean) => {
-    if (isExiting) {
-        return isReportVisible 
-            ? 'animate-slide-out-to-right' 
-            : 'animate-slide-out-to-left';
-    }
-    return isReportVisible
-        ? 'animate-slide-in-from-right'
-        : 'animate-slide-in-from-left';
-  }
-
   return (
-    <div className="container mx-auto max-w-4xl py-8 px-4 sm:px-6 lg:px-8 overflow-x-hidden">
-      {report ? (
-        <div className={`space-y-6 ${getAnimationClasses(true)}`}>
-            <ReportDisplay report={report} />
-            <div className="text-center">
-                <Button onClick={handleNewCheck} size="lg">
-                    Check Another Claim
-                </Button>
-            </div>
+    <div className="flex flex-col gap-6">
+      <header>
+        <h1 className="text-3xl font-bold tracking-tight">Misinformation Detection</h1>
+      </header>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <ClaimForm />
         </div>
-      ) : (
-        <div className={getAnimationClasses(false)}>
-            <ClaimForm onReportGenerated={handleReportGenerated} />
+        <div className="flex flex-col gap-6">
+          <MisinformationTrendsChart />
+          <DetectionAccuracyChart />
         </div>
-      )}
+      </div>
+       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <ReportSummaryChart />
+          </div>
+          <CategoryDistributionChart />
+       </div>
     </div>
   );
 }

@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { Loader2 } from "lucide-react";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -39,9 +38,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <SidebarProvider>
-        <AppSidebar user={user} />
-        <main className="flex-1 bg-background">{children}</main>
-    </SidebarProvider>
+    <div className="flex min-h-screen w-full bg-background">
+      <AppSidebar user={user} />
+      <main className="flex-1 flex flex-col p-4 sm:p-6 lg:p-8">{children}</main>
+    </div>
   );
 }
