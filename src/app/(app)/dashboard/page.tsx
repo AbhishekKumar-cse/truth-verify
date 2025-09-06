@@ -10,19 +10,39 @@ export type ReportWithId = GenerateFactCheckReportOutput & { id: string };
 
 export default function DashboardPage() {
   const [report, setReport] = useState<ReportWithId | null>(null);
+  const [isExiting, setIsExiting] = useState(false);
 
   const handleReportGenerated = (generatedReport: ReportWithId) => {
-    setReport(generatedReport);
+    setIsExiting(true);
+    setTimeout(() => {
+        setReport(generatedReport);
+        setIsExiting(false);
+    }, 500);
   };
 
   const handleNewCheck = () => {
-    setReport(null);
+    setIsExiting(true);
+    setTimeout(() => {
+        setReport(null);
+        setIsExiting(false);
+    }, 500);
+  }
+
+  const getAnimationClasses = (isReportVisible: boolean) => {
+    if (isExiting) {
+        return isReportVisible 
+            ? 'animate-slide-out-to-right' 
+            : 'animate-slide-out-to-left';
+    }
+    return isReportVisible
+        ? 'animate-slide-in-from-right'
+        : 'animate-slide-in-from-left';
   }
 
   return (
-    <div className="container mx-auto max-w-4xl py-8 px-4 sm:px-6 lg:px-8">
+    <div className="container mx-auto max-w-4xl py-8 px-4 sm:px-6 lg:px-8 overflow-x-hidden">
       {report ? (
-        <div className="space-y-6">
+        <div className={`space-y-6 ${getAnimationClasses(true)}`}>
             <ReportDisplay report={report} />
             <div className="text-center">
                 <Button onClick={handleNewCheck} size="lg">
@@ -31,7 +51,9 @@ export default function DashboardPage() {
             </div>
         </div>
       ) : (
-        <ClaimForm onReportGenerated={handleReportGenerated} />
+        <div className={getAnimationClasses(false)}>
+            <ClaimForm onReportGenerated={handleReportGenerated} />
+        </div>
       )}
     </div>
   );
