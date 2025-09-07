@@ -19,9 +19,12 @@ const GenerateFactCheckReportInputSchema = z.object({
 export type GenerateFactCheckReportInput = z.infer<typeof GenerateFactCheckReportInputSchema>;
 
 const GenerateFactCheckReportOutputSchema = z.object({
-  truthScore: z.number().describe('A numerical score (0-100) representing the truthfulness of the claim.'),
-  verdict: z.string().describe('A concise verdict on the claim (e.g., True, False, Mostly True, Mostly False, Misleading).'),
-  supportingSources: z.array(z.string()).describe('A list of URLs or references to credible sources supporting the verdict.'),
+    verdict: z.enum(["True", "False", "Unverifiable"]).describe("Your final verdict on the claim."),
+    explanation: z.string().describe("A short explanation of why the claim is true, false, or unverifiable."),
+    sources: z.array(z.object({
+        title: z.string().describe("The title of the source article or page."),
+        url: z.string().url().describe("The URL of the credible source."),
+    })).describe("A list of credible sources to support the verdict."),
 });
 export type GenerateFactCheckReportOutput = z.infer<typeof GenerateFactCheckReportOutputSchema>;
 
@@ -33,20 +36,18 @@ const generateFactCheckReportPrompt = ai.definePrompt({
   name: 'generateFactCheckReportPrompt',
   input: {schema: GenerateFactCheckReportInputSchema},
   output: {schema: GenerateFactCheckReportOutputSchema},
-  prompt: `You are an expert fact-checker. Analyze the following claim and generate a fact-check report.
+  prompt: `You are a fact-checking assistant.
+The user has submitted the following claim:
 
-Claim Title: {{{title}}}
-Claim Statement: {{{statement}}}
-Category: {{{category}}}
-Source URL (if provided): {{{sourceUrl}}}
+Claim: "{{statement}}"
 
-Based on your analysis, provide the following:
-
-- TruthScore: A numerical score (0-100) representing the truthfulness of the claim. 100 means completely true and 0 means completely false.
-- Verdict: A concise verdict on the claim (e.g., True, False, Mostly True, Mostly False, Misleading).
-- SupportingSources: A list of URLs or references to credible sources supporting the verdict. Be very careful about which sources to trust. If no sources are found, you MUST return an empty array [].
-
-Your response MUST be a valid JSON object that strictly adheres to the defined schema. Do not include any extra text or explanations outside of the JSON structure.`,
+Your tasks:
+1. Analyze the claim and decide if it is factually correct or incorrect.
+2. If the claim is correct, provide at least one credible source (news site, research, or government website).
+3. If the claim is incorrect, explain why it is wrong and provide at least one credible source that disproves it.
+4. If you cannot verify the claim, state that it is unverifiable and do not provide sources.
+5. Return your answer in JSON format that strictly adheres to the defined schema.
+`,
 });
 
 const generateFactCheckReportFlow = ai.defineFlow(

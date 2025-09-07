@@ -18,17 +18,18 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 
+export type ReportWithId = Report & { id: string };
+
 const getVerdictVariant = (verdict: string): "default" | "secondary" | "destructive" | "outline" => {
     const lowerVerdict = verdict.toLowerCase();
     if (lowerVerdict.includes("true")) return "default";
     if (lowerVerdict.includes("false")) return "destructive";
-    if (lowerVerdict.includes("misleading") || lowerVerdict.includes("mixed")) return "secondary";
-    return "outline";
+    return "secondary";
 };
 
 export function ReportsList() {
   const router = useRouter();
-  const [reports, setReports] = useState<Report[]>([]);
+  const [reports, setReports] = useState<ReportWithId[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,7 +48,7 @@ export function ReportsList() {
           const reportsData = querySnapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
-          })) as Report[];
+          })) as ReportWithId[];
           
           setReports(reportsData);
         } catch (error: any) {
@@ -110,7 +111,6 @@ export function ReportsList() {
             <TableHead className="hidden md:table-cell">Category</TableHead>
             <TableHead>Verdict</TableHead>
             <TableHead className="hidden sm:table-cell">Date</TableHead>
-            <TableHead className="text-right">Score</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -124,7 +124,6 @@ export function ReportsList() {
               <TableCell className="hidden sm:table-cell">
                 {report.createdAt ? new Date(report.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}
               </TableCell>
-              <TableCell className="text-right font-bold">{report.truthScore}</TableCell>
             </TableRow>
           ))}
         </TableBody>

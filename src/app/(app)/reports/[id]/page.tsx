@@ -1,11 +1,8 @@
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { ReportDisplay } from "@/components/dashboard/report-display";
-import type { Report } from "@/types";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle } from "lucide-react";
 import { notFound } from "next/navigation";
-import { ReportWithId } from "../dashboard/page";
+import { ReportWithId } from "@/components/reports/reports-list";
 
 async function getReport(id: string): Promise<ReportWithId | null> {
   const docRef = doc(db, "reports", id);

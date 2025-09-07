@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { adminDb } from "@/lib/firebase-admin";
-import { generateFactCheckReport, GenerateFactCheckReportInput, GenerateFactCheckReportOutput } from "@/ai/flows/generate-fact-check-report";
+import { generateFactCheckReport, GenerateFactCheckReportInput } from "@/ai/flows/generate-fact-check-report";
 import { Timestamp } from "firebase-admin/firestore";
 
 const claimSchema = z.object({
@@ -12,7 +12,20 @@ const claimSchema = z.object({
   sourceUrl: z.string().optional(),
 });
 
-export async function submitClaim(values: z.infer<typeof claimSchema>, userId: string): Promise<{ success: boolean; data?: GenerateFactCheckReportOutput & { id: string }; error?: string }> {
+type SubmitClaimResult = {
+  success: true;
+  data: {
+    id: string;
+    verdict: string;
+    explanation: string;
+    sources: { title: string; url: string }[];
+  };
+} | {
+  success: false;
+  error: string;
+};
+
+export async function submitClaim(values: z.infer<typeof claimSchema>, userId: string): Promise<SubmitClaimResult> {
   try {
     if (!adminDb) {
       throw new Error("Firebase Admin SDK is not initialized. Please ensure your service account key is configured correctly on the server.");
@@ -37,9 +50,9 @@ export async function submitClaim(values: z.infer<typeof claimSchema>, userId: s
       claimStatement: validatedValues.statement,
       claimCategory: validatedValues.category,
       claimSourceUrl: validatedValues.sourceUrl || "",
-      truthScore: report.truthScore,
       verdict: report.verdict,
-      supportingSources: report.supportingSources,
+      explanation: report.explanation,
+      sources: report.sources,
       createdAt: Timestamp.now(),
     };
 

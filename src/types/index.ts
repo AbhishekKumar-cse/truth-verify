@@ -7,8 +7,11 @@ export interface Report {
   claimStatement: string;
   claimCategory: string;
   claimSourceUrl?: string;
-  truthScore: number;
-  verdict: string;
-  supportingSources: string[];
+  verdict: "True" | "False" | "Unverifiable";
+  explanation: string;
+  sources: {
+    title: string;
+    url: string;
+  }[];
   createdAt: Timestamp;
 }
