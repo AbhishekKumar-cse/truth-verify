@@ -59,7 +59,11 @@ export async function submitClaim(values: z.infer<typeof claimSchema>, userId: s
     const fullReport: ReportWithId = {
       ...reportData,
       id: docRef.id,
-      createdAt,
+      // Convert Timestamp to a plain object for serialization
+      createdAt: {
+        seconds: createdAt.seconds,
+        nanoseconds: createdAt.nanoseconds,
+      },
     }
 
     return { success: true, data: fullReport };
