@@ -2,12 +2,13 @@
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, FileDown } from "lucide-react";
+import { ExternalLink, FileDown, RotateCcw } from "lucide-react";
 import type { ReportWithId } from "../reports/reports-list";
 import { Button } from "../ui/button";
 
 type ReportDisplayProps = {
   report: ReportWithId;
+  onNewCheck?: () => void;
 };
 
 const getVerdictVariant = (verdict: string): "default" | "secondary" | "destructive" | "outline" => {
@@ -17,7 +18,7 @@ const getVerdictVariant = (verdict: string): "default" | "secondary" | "destruct
     return "secondary";
 };
 
-export function ReportDisplay({ report }: ReportDisplayProps) {
+export function ReportDisplay({ report, onNewCheck }: ReportDisplayProps) {
 
   const handlePrint = () => {
     const printWindow = window.open(`/reports/${report.id}?print=true`, '_blank');
@@ -64,11 +65,17 @@ export function ReportDisplay({ report }: ReportDisplayProps) {
             )}
         </div>
       </CardContent>
-      <CardFooter className="justify-center">
+      <CardFooter className="justify-center gap-2">
          <Button variant="outline" onClick={handlePrint}>
             <FileDown className="mr-2 h-4 w-4" />
             Download as PDF
         </Button>
+        {onNewCheck && (
+            <Button onClick={onNewCheck}>
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Start New Check
+            </Button>
+        )}
       </CardFooter>
     </Card>
   );

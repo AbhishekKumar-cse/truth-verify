@@ -4,6 +4,7 @@ import { z } from "zod";
 import { adminDb } from "@/lib/firebase-admin";
 import { generateFactCheckReport, GenerateFactCheckReportInput } from "@/ai/flows/generate-fact-check-report";
 import { Timestamp } from "firebase-admin/firestore";
+import type { ReportWithId } from "@/components/reports/reports-list";
 
 const claimSchema = z.object({
   title: z.string(),
@@ -14,12 +15,7 @@ const claimSchema = z.object({
 
 type SubmitClaimResult = {
   success: true;
-  data: {
-    id: string;
-    verdict: string;
-    explanation: string;
-    sources: { title: string; url: string }[];
-  };
+  data: ReportWithId;
 } | {
   success: false;
   error: string;
@@ -44,6 +40,8 @@ export async function submitClaim(values: z.infer<typeof claimSchema>, userId: s
 
     const report = await generateFactCheckReport(reportInput);
 
+    const createdAt = Timestamp.now();
+
     const reportData = {
       userId,
       claimTitle: validatedValues.title,
@@ -53,12 +51,18 @@ export async function submitClaim(values: z.infer<typeof claimSchema>, userId: s
       verdict: report.verdict,
       explanation: report.explanation,
       sources: report.sources,
-      createdAt: Timestamp.now(),
+      createdAt,
     };
 
     const docRef = await adminDb.collection("reports").add(reportData);
 
-    return { success: true, data: { ...report, id: docRef.id } };
+    const fullReport: ReportWithId = {
+      ...reportData,
+      id: docRef.id,
+      createdAt,
+    }
+
+    return { success: true, data: fullReport };
   } catch (error: any) {
     console.error("Error submitting claim:", error);
 

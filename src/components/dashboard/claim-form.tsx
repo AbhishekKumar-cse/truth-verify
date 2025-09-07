@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { submitClaim } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import type { ReportWithId } from "../reports/reports-list";
 
 const formSchema = z.object({
   title: z.string().min(10, "Title must be at least 10 characters.").max(150, "Title must be 150 characters or less."),
@@ -24,7 +24,11 @@ const formSchema = z.object({
 
 const claimCategories = ["Politics", "Health", "Science", "Technology", "Social Media", "Business", "Other"];
 
-export function ClaimForm() {
+interface ClaimFormProps {
+    onReportGenerated: (report: ReportWithId) => void;
+}
+
+export function ClaimForm({ onReportGenerated }: ClaimFormProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
@@ -57,6 +61,7 @@ export function ClaimForm() {
           description: "Your fact-check report has been saved to 'My Reports'.",
         });
         form.reset();
+        onReportGenerated(result.data);
       } else {
         throw new Error(result.error || "Failed to generate report.");
       }
@@ -72,90 +77,86 @@ export function ClaimForm() {
   }
 
   return (
-    <Card className="h-full">
-      <CardContent className="pt-6">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Claim Title</FormLabel>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="title"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Claim Title</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., 'Study shows chocolate cures all diseases'" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="statement"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Full Statement</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Provide the full text of the claim here..."
+                  className="min-h-[120px]"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="category"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Category</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <Input placeholder="e.g., 'Study shows chocolate cures all diseases'" {...field} />
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="statement"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Full Statement</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Provide the full text of the claim here..."
-                      className="min-h-[120px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a category" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {claimCategories.map(cat => (
-                           <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="sourceUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Source URL</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <Button type="submit" size="lg" className="w-full" disabled={isLoading || !user}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating Report...
-                </>
-              ) : (
-                "Generate Fact-Check Report"
-              )}
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+                  <SelectContent>
+                    {claimCategories.map(cat => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="sourceUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Source URL</FormLabel>
+                <FormControl>
+                  <Input placeholder="https://example.com" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <Button type="submit" size="lg" className="w-full" disabled={isLoading || !user}>
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Generating Report...
+            </>
+          ) : (
+            "Generate Fact-Check Report"
+          )}
+        </Button>
+      </form>
+    </Form>
   );
 }
