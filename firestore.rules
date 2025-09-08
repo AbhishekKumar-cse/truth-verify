@@ -1,0 +1,15 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow public read-only access to reports for the tracker page
+    match /reports/{reportId} {
+      allow get: if true;
+      allow list: if true;
+      
+      // Keep existing rules for authenticated users to create/read their own reports
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+  }
+}
