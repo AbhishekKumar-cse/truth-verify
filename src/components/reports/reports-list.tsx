@@ -20,11 +20,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui
 
 export type ReportWithId = Report & { id: string };
 
-const getVerdictVariant = (verdict: string): "default" | "secondary" | "destructive" | "outline" => {
-    const lowerVerdict = verdict.toLowerCase();
-    if (lowerVerdict.includes("true")) return "default";
-    if (lowerVerdict.includes("false")) return "destructive";
-    return "secondary";
+const getScoreVariant = (score: number): "default" | "secondary" | "destructive" | "outline" => {
+    if (score >= 75) return "default";
+    if (score >= 40) return "secondary";
+    return "destructive";
 };
 
 export function ReportsList() {
@@ -119,10 +118,10 @@ export function ReportsList() {
               <TableCell className="font-medium max-w-xs truncate">{report.claimTitle}</TableCell>
               <TableCell className="hidden md:table-cell">{report.claimCategory}</TableCell>
               <TableCell>
-                <Badge variant={getVerdictVariant(report.verdict)}>{report.verdict}</Badge>
+                <Badge variant={getScoreVariant(report.truthScore)}>{report.verdict}</Badge>
               </TableCell>
               <TableCell className="hidden sm:table-cell">
-                {report.createdAt ? new Date(report.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}
+                {report.createdAt && typeof report.createdAt === 'object' && 'seconds' in report.createdAt ? new Date(report.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}
               </TableCell>
             </TableRow>
           ))}

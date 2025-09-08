@@ -48,6 +48,7 @@ export async function submitClaim(values: z.infer<typeof claimSchema>, userId: s
       claimStatement: validatedValues.statement,
       claimCategory: validatedValues.category,
       claimSourceUrl: validatedValues.sourceUrl || "",
+      truthScore: report.truthScore,
       verdict: report.verdict,
       explanation: report.explanation,
       sources: report.sources,

@@ -1,21 +1,14 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { ExternalLink, FileDown, RotateCcw } from "lucide-react";
 import type { ReportWithId } from "../reports/reports-list";
 import { Button } from "../ui/button";
+import { ScoreCircle } from "./score-circle";
 
 type ReportDisplayProps = {
   report: ReportWithId;
   onNewCheck?: () => void;
-};
-
-const getVerdictVariant = (verdict: string): "default" | "secondary" | "destructive" | "outline" => {
-    const lowerVerdict = verdict.toLowerCase();
-    if (lowerVerdict.includes("true")) return "default";
-    if (lowerVerdict.includes("false")) return "destructive";
-    return "secondary";
 };
 
 export function ReportDisplay({ report, onNewCheck }: ReportDisplayProps) {
@@ -29,17 +22,19 @@ export function ReportDisplay({ report, onNewCheck }: ReportDisplayProps) {
 
   return (
     <Card className="w-full" id="report-content">
-      <CardHeader className="text-center">
+      <CardHeader className="items-center text-center">
         <CardTitle className="text-3xl font-bold">Fact-Check Report</CardTitle>
         <CardDescription className="text-lg">Analysis of: "{report.claimTitle}"</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="text-center p-4 rounded-lg bg-accent/50">
-            <h3 className="text-sm font-semibold uppercase text-muted-foreground">Verdict</h3>
-            <Badge variant={getVerdictVariant(report.verdict)} className="text-xl px-4 py-1 my-2">
-                {report.verdict}
-            </Badge>
-             <p className="text-accent-foreground">{report.explanation}</p>
+        <div className="flex flex-col items-center gap-4 text-center">
+            <ScoreCircle score={report.truthScore} />
+            <h2 className="text-2xl font-semibold">{report.verdict}</h2>
+        </div>
+        
+        <div className="p-4 rounded-lg bg-accent/50">
+            <h3 className="mb-2 text-lg font-semibold text-center">Detailed Explanation</h3>
+            <p className="text-accent-foreground">{report.explanation}</p>
         </div>
         
         <div>
@@ -55,7 +50,7 @@ export function ReportDisplay({ report, onNewCheck }: ReportDisplayProps) {
                             rel="noopener noreferrer" 
                             className="text-primary hover:underline break-all"
                         >
-                            {source.title} ({source.url})
+                            {source.title}
                         </a>
                     </li>
                     ))}

@@ -19,8 +19,9 @@ const GenerateFactCheckReportInputSchema = z.object({
 export type GenerateFactCheckReportInput = z.infer<typeof GenerateFactCheckReportInputSchema>;
 
 const GenerateFactCheckReportOutputSchema = z.object({
-    verdict: z.enum(["True", "False", "Unverifiable"]).describe("Your final verdict on the claim."),
-    explanation: z.string().describe("A short explanation of why the claim is true, false, or unverifiable."),
+    truthScore: z.number().min(0).max(100).describe("A numerical score from 0 to 100 representing the likelihood that the claim is true. 100 is completely true, 0 is completely false."),
+    verdict: z.string().describe("A concise (2-4 word) verdict summarizing the finding, like 'Highly Misleading', 'Factually Correct', or 'Lacks Evidence'."),
+    explanation: z.string().describe("A detailed explanation of the reasoning behind the verdict and score, analyzing the claim and the evidence."),
     sources: z.array(z.object({
         title: z.string().describe("The title of the source article or page."),
         url: z.string().url().describe("The URL of the credible source."),
@@ -36,17 +37,18 @@ const generateFactCheckReportPrompt = ai.definePrompt({
   name: 'generateFactCheckReportPrompt',
   input: {schema: GenerateFactCheckReportInputSchema},
   output: {schema: GenerateFactCheckReportOutputSchema},
-  prompt: `You are a fact-checking assistant.
-The user has submitted the following claim:
+  prompt: `You are a sophisticated fact-checking AI. The user has submitted a claim for analysis.
 
 Claim: "{{statement}}"
+{{#if sourceUrl}}Source Provided: {{sourceUrl}}{{/if}}
 
-Your tasks:
-1. Analyze the claim and decide if it is factually correct or incorrect.
-2. If the claim is correct, provide at least one credible source (news site, research, or government website).
-3. If the claim is incorrect, explain why it is wrong and provide at least one credible source that disproves it.
-4. If you cannot verify the claim, state that it is unverifiable and do not provide sources.
-5. Return your answer in JSON format that strictly adheres to the defined schema.
+Your tasks are to:
+1.  **Analyze the claim thoroughly.** Scrutinize the statement, its implications, and any provided source material.
+2.  **Determine a Truth Score.** Assign a confidence score from 0 (completely false) to 100 (completely true) based on credible evidence.
+3.  **Provide a concise Verdict.** Give a short, descriptive verdict (e.g., "Factually Correct," "Mostly True," "Misleading," "False," "Unverifiable").
+4.  **Write a detailed Explanation.** Explain your reasoning for the score and verdict. If the claim is false or misleading, clearly state why and what the correct information is.
+5.  **Find Supporting Sources.** Provide at least two credible, high-authority sources (e.g., major news outlets, scientific journals, government reports) that support your analysis. If the claim is unverifiable, do not provide sources.
+6.  **Return your answer in the required JSON format.**
 `,
 });
 
