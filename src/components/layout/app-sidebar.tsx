@@ -2,7 +2,7 @@
 
 import { signOut, User } from "firebase/auth";
 import { usePathname, useRouter } from "next/navigation";
-import { BookCopy, LayoutDashboard, LogOut, User as UserIcon } from "lucide-react";
+import { BookCopy, LayoutDashboard, LogOut, Siren, User as UserIcon } from "lucide-react";
 import Link from 'next/link';
 
 import { auth } from "@/lib/firebase";
@@ -58,6 +58,10 @@ export function AppSidebar({ user }: AppSidebarProps) {
                     <NavLink href="/reports" isActive={pathname.startsWith("/reports")}>
                         <BookCopy className="h-4 w-4" />
                         My Reports
+                    </NavLink>
+                    <NavLink href="/misleading-data" isActive={pathname === "/misleading-data"}>
+                        <Siren className="h-4 w-4" />
+                        Misleading Data
                     </NavLink>
                 </nav>
             </div>
