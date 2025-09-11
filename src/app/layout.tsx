@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: 'Truth Lens',
-  description: 'AI-powered fact-checking for everyone.',
+  description: 'Empowering you to combat misinformation. Truth Lens provides powerful AI-driven fact-checking and data analysis to help you verify claims and understand the truth.',
 };
 
 export default function RootLayout({
