@@ -9,6 +9,7 @@ import { CategoryDistributionChart } from "@/components/dashboard/category-distr
 import { ReportDisplay } from "@/components/dashboard/report-display";
 import type { ReportWithId } from "@/components/reports/reports-list";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { LatestReports } from "@/components/dashboard/latest-reports";
 
 export default function DashboardPage() {
   const [currentReport, setCurrentReport] = useState<ReportWithId | null>(null);
@@ -42,15 +43,18 @@ export default function DashboardPage() {
           )}
         </div>
         <div className="flex flex-col gap-6">
+          <LatestReports />
           <MisinformationTrendsChart />
-          <DetectionAccuracyChart />
         </div>
       </div>
        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <ReportSummaryChart />
           </div>
-          <CategoryDistributionChart />
+           <div className="flex flex-col gap-6">
+              <DetectionAccuracyChart />
+              <CategoryDistributionChart />
+           </div>
        </div>
     </div>
   );
