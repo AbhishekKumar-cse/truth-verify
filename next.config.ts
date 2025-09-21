@@ -24,6 +24,11 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  experimental: {
+    allowedDevOrigins: [
+        "https://6000-firebase-truth-lens-2-1757180604908.cluster-va5f6x3wzzh4stde63ddr3qgge.cloudworkstations.dev"
+    ]
+  }
 };
 
 export default nextConfig;
