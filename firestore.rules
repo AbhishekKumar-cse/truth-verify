@@ -1,16 +1,21 @@
-
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users can only read and write their own reports.
+    // Reports can be read by their owner, and created by any authenticated user.
     match /reports/{reportId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null;
+    }
+    
+    // Allow listing reports only for the currently logged-in user.
+    match /reports/{userId} {
+       allow list: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Any authenticated user can read the news reports.
+    // News reports can be read by any authenticated user.
     match /news_reports/{reportId} {
-      allow read: if request.auth != null;
+      allow read, list: if request.auth != null;
+      allow create: if request.auth != null; // Should be locked down further in production
     }
   }
 }

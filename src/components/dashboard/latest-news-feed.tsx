@@ -20,8 +20,12 @@ const getScoreVariant = (score: number): "default" | "secondary" | "destructive"
     return "destructive";
 };
 
+type ClientNewsReport = Omit<NewsReport, 'createdAt'> & {
+  createdAt: string | null;
+};
+
 export function LatestNewsFeed() {
-  const [latestReport, setLatestReport] = useState<NewsReport | null>(null);
+  const [latestReport, setLatestReport] = useState<ClientNewsReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
@@ -32,10 +36,20 @@ export function LatestNewsFeed() {
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       if (!querySnapshot.empty) {
-        const reportData = {
+        const docData = querySnapshot.docs[0].data();
+        const createdAt = docData.createdAt;
+
+        const reportData: ClientNewsReport = {
           id: querySnapshot.docs[0].id,
-          ...querySnapshot.docs[0].data(),
-        } as NewsReport;
+          headline: docData.headline,
+          claim: docData.claim,
+          category: docData.category,
+          truthScore: docData.truthScore,
+          verdict: docData.verdict,
+          explanation: docData.explanation,
+          sources: docData.sources,
+          createdAt: createdAt?.seconds ? new Date(createdAt.seconds * 1000).toISOString() : null,
+        };
         setLatestReport(reportData);
       }
       setLoading(false);
@@ -56,7 +70,13 @@ export function LatestNewsFeed() {
           title: "New Report Generated!",
           description: "The latest news has been fact-checked.",
         });
-        setLatestReport(result.data);
+        
+        const createdAt = result.data.createdAt;
+        const clientReport: ClientNewsReport = {
+            ...result.data,
+            createdAt: createdAt?.seconds ? new Date(createdAt.seconds * 1000).toISOString() : null
+        }
+        setLatestReport(clientReport);
       } else {
         throw new Error(result.error || "Failed to generate report.");
       }
@@ -90,8 +110,8 @@ export function LatestNewsFeed() {
                 <div className="flex items-center justify-between text-muted-foreground">
                     <Badge variant={getScoreVariant(latestReport.truthScore)} className="text-xs">{latestReport.verdict}</Badge>
                     <span>
-                        {latestReport.createdAt && typeof latestReport.createdAt === 'object' && 'seconds' in latestReport.createdAt 
-                            ? formatDistanceToNow(new Date(latestReport.createdAt.seconds * 1000), { addSuffix: true })
+                        {latestReport.createdAt
+                            ? formatDistanceToNow(new Date(latestReport.createdAt), { addSuffix: true })
                             : 'N/A'}
                     </span>
                 </div>
