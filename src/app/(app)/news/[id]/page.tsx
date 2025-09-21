@@ -17,11 +17,11 @@ async function getNewsReport(id: string): Promise<NewsReport | null> {
 
 
 export default async function NewsReportPage({
-  params,
+  params: { id },
 }: {
   params: { id: string };
 }) {
-  const newsReport = await getNewsReport(params.id);
+  const newsReport = await getNewsReport(id);
 
   if (!newsReport) {
     notFound();
