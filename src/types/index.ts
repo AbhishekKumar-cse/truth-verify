@@ -16,3 +16,18 @@ export interface Report {
   }[];
   createdAt: Timestamp | { seconds: number, nanoseconds: number };
 }
+
+export interface NewsReport {
+    id: string;
+    headline: string;
+    claim: string;
+    category: string;
+    truthScore: number;
+    verdict: string;
+    explanation: string;
+    sources: {
+        title: string;
+        url: string;
+    }[];
+    createdAt: Timestamp | { seconds: number, nanoseconds: number };
+}

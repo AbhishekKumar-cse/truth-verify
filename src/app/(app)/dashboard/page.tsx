@@ -10,6 +10,7 @@ import { ReportDisplay } from "@/components/dashboard/report-display";
 import type { ReportWithId } from "@/components/reports/reports-list";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { LatestReports } from "@/components/dashboard/latest-reports";
+import { LatestNewsFeed } from "@/components/dashboard/latest-news-feed";
 
 export default function DashboardPage() {
   const [currentReport, setCurrentReport] = useState<ReportWithId | null>(null);
@@ -43,6 +44,7 @@ export default function DashboardPage() {
           )}
         </div>
         <div className="flex flex-col gap-6">
+          <LatestNewsFeed />
           <LatestReports />
           <MisinformationTrendsChart />
         </div>
